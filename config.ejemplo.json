@@ -1,6 +1,8 @@
 {
   "clave_asistente": ["jarvis", "hey jarvis"],
   "nombre_asistente": "Jarvis",
+  "nombre_usuario": "Ramiro",
+  "saludo": "Hola {usuario}, soy {asistente}. ¿En qué trabajamos ahora?",
   "idioma": "es-ES",
   "microfono_indice": null,
   "timeout_escucha": 7,

@@ -11,11 +11,25 @@ pip install -r requirements.txt
 
 ## Configuración
 
-Edita `config.json`:
+1. Copia `config.ejemplo.json` y renómbralo a `config.json`:
 
-1. **Gmail**: genera una *App Password* en tu cuenta de Google (ajustes de seguridad → verificación en 2 pasos → contraseñas de aplicaciones) y ponla en `app_password`.
-2. **Rutina**: completa los horarios de cada día en `rutina` usando el formato `"hora": "HH:MM"` y una `"tarea"` descriptiva.
-3. **Música**: agrega en `canciones` los temas que quieras abreviar por voz (ej. `"black in black": "Back In Black AC/DC"`).
+   ```bash
+   cp config.ejemplo.json config.json
+   ```
+
+2. Edita `config.json` con tus datos:
+
+   | Campo | Qué pones |
+   |---|---|
+   | `email.usuario` | Tu correo Gmail real |
+   | `email.app_password` | App Password de Gmail (ajustes → verificación en 2 pasos → contraseñas de aplicaciones) |
+   | `gemini.api_key` | Tu API key de Google Gemini (https://aistudio.google.com) |
+   | `nombre_usuario` | Tu nombre (ej. "Ramiro") |
+   | `saludo` | Personaliza el saludo de voz. Usa `{usuario}` y `{asistente}` |
+   | `rutina` | Horarios de cada día (`"hora": "HH:MM"`, `"tarea": "..."`) |
+   | `musica.canciones` | Abreviaciones de voz → URL o búsqueda de YouTube |
+
+> **⚠️ IMPORTANTE**: `config.json` está en `.gitignore` porque contiene credenciales reales. **No lo subas a GitHub.** Usa `config.ejemplo.json` como referencia de la estructura si compartes el proyecto.
 
 ## Uso
 
@@ -32,7 +46,8 @@ python jarvis.py
 | "¿qué tengo que hacer hoy?"               | Lista la rutina del día             |
 | "¿cuál es la próxima tarea?"              | Dice la próxima tarea               |
 | "¿tengo correos nuevos?"                  | Cuenta no leídos en Gmail           |
-| "reproduce black in black"                | Abre la canción en YouTube          |
+| "reproduce black in black"                | Reprocha la canción en YouTube (auto-play) |
+| "pregúntale a jarvis [algo]"              | Pregunta a Gemini AI                |
 | "salir" / "detente"                       | Cierra el asistente                 |
 
 ### Avisos automáticos

@@ -33,6 +33,11 @@ def cargar_config():
         return json.load(f)
 
 
+def generar_saludo(config):
+    plantilla = config.get("saludo", "Hola {usuario}, soy {asistente}. ¿En qué te ayudo?")
+    return plantilla.replace("{usuario}", config.get("nombre_usuario", "")).replace("{asistente}", config["nombre_asistente"])
+
+
 def procesar(comando, config):
     print(f"\nProcesando comando: '{comando}'", flush=True)
 
@@ -121,7 +126,7 @@ def main():
         print("Usando micrófono por defecto.", flush=True)
 
     calibrar(recognizer, mic)
-    hablar(f"Hola, soy {config['nombre_asistente']}. ¿En qué te ayudo?")
+    hablar(generar_saludo(config))
 
     rutina.iniciar(config, hablar)
     correo.iniciar_avisos(config, hablar)

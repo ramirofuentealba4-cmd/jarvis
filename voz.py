@@ -1,17 +1,50 @@
+import sys
 import threading
-import pyttsx3
 from speech_recognition import UnknownValueError, RequestError
 
 _engine = None
 _engine_lock = threading.Lock()
+_voz_disponible = False
+
+try:
+    import pyttsx3
+    _voz_disponible = True
+except Exception as e:
+    print(f"pyttsx3 no disponible: {e}", flush=True)
+    _voz_disponible = False
+
+
+def _crear_engine():
+    try:
+        engine = pyttsx3.init()
+        voces = engine.getProperty("voices")
+        for v in voces:
+            if "spanish" in v.id.lower() or "es_" in v.id.lower() or "es-" in v.id.lower():
+                engine.setProperty("voice", v.id)
+                break
+        return engine
+    except Exception as e:
+        print(f"No se pudo inicializar el motor de voz: {e}", flush=True)
+        return None
+
 
 def hablar(texto):
     global _engine
+    print(f"JARVIS: {texto}", flush=True)
+
+    if not _voz_disponible:
+        return
+
     with _engine_lock:
-        if _engine is None:
-            _engine = pyttsx3.init()
-        _engine.say(texto)
-        _engine.runAndWait()
+        try:
+            if _engine is None:
+                _engine = _crear_engine()
+            if _engine is not None:
+                _engine.say(texto)
+                _engine.runAndWait()
+        except Exception as e:
+            print(f"Error al hablar: {e}", flush=True)
+
 
 def calibrar(recognizer, fuente):
     hablar("Calibrando micrófono, dame un momento.")
@@ -21,6 +54,7 @@ def calibrar(recognizer, fuente):
     print(f"Umbral de energía: {recognizer.energy_threshold}", flush=True)
     hablar("Listo, ya puedo escucharte.")
     print("Micrófono calibrado.", flush=True)
+
 
 def escuchar(recognizer, fuente, idioma="es-ES", timeout_escucha=7, duracion_frase=8):
     try:
