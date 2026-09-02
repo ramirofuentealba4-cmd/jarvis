@@ -12,15 +12,22 @@ def hablar(texto):
         _engine.say(texto)
         _engine.runAndWait()
 
-def escuchar(recognizer, fuente, idioma="es-ES"):
+def calibrar(recognizer, fuente):
+    print("Calibrando micrófono...", flush=True)
+    with fuente:
+        recognizer.adjust_for_ambient_noise(fuente, duration=1.0)
+    print(f"Umbral de energía: {recognizer.energy_threshold}", flush=True)
+    print("Micrófono calibrado.", flush=True)
+
+def escuchar(recognizer, fuente, idioma="es-ES", timeout_escucha=7, duracion_frase=8):
     try:
-        with fuente:
-            recognizer.adjust_for_ambient_noise(fuente, duration=0.4)
-        print("Escuchando...")
+        print("Escuchando...", flush=True)
         with fuente as source:
-            audio = recognizer.listen(source, timeout=5, phrase_time_limit=5)
+            audio = recognizer.listen(source, timeout=timeout_escucha, phrase_time_limit=duracion_frase)
+        print("Procesando voz...", flush=True)
         texto = recognizer.recognize_google(audio, language=idioma)
-        print(f"Reconocido: {texto}")
+        print(f"Reconocido: {texto}", flush=True)
         return texto.lower()
     except Exception as e:
+        print(f"Error de reconocimiento: {type(e).__name__}: {e}", flush=True)
         return ""

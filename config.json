@@ -2,6 +2,9 @@
   "clave_asistente": ["jarvis", "hey jarvis"],
   "nombre_asistente": "Jarvis",
   "idioma": "es-ES",
+  "microfono_indice": null,
+  "timeout_escucha": 7,
+  "duracion_frase": 8,
   "email": {
     "usuario": "TU_EMAIL@gmail.com",
     "app_password": "TU_APP_PASSWORD",
