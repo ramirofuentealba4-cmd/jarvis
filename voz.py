@@ -14,10 +14,12 @@ def hablar(texto):
         _engine.runAndWait()
 
 def calibrar(recognizer, fuente):
+    hablar("Calibrando micrófono, dame un momento.")
     print("Calibrando micrófono...", flush=True)
     with fuente:
         recognizer.adjust_for_ambient_noise(fuente, duration=1.0)
     print(f"Umbral de energía: {recognizer.energy_threshold}", flush=True)
+    hablar("Listo, ya puedo escucharte.")
     print("Micrófono calibrado.", flush=True)
 
 def escuchar(recognizer, fuente, idioma="es-ES", timeout_escucha=7, duracion_frase=8):
@@ -31,10 +33,13 @@ def escuchar(recognizer, fuente, idioma="es-ES", timeout_escucha=7, duracion_fra
         return texto.lower()
     except UnknownValueError:
         print("Error de reconocimiento: no pude entender lo que dijiste.", flush=True)
+        hablar("No te escuché bien, repite por favor.")
         return ""
     except RequestError as e:
         print(f"Error de reconocimiento: no hay conexión con el servicio de voz. ({e})", flush=True)
+        hablar("No tengo conexión con el servicio de voz.")
         return ""
     except Exception as e:
         print(f"Error de reconocimiento: {e}", flush=True)
+        hablar("Hubo un error al escuchar.")
         return ""

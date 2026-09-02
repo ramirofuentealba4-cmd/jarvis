@@ -96,6 +96,7 @@ def procesar(comando, config):
                 return True
 
         print("No reconocido, consultando a Gemini...", flush=True)
+        hablar("Un momento, estoy consultando con Gemini.")
         respuesta = gemini.preguntar_gemini(config, comando)
         hablar(respuesta)
         return True
