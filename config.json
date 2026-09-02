@@ -1,0 +1,41 @@
+{
+  "clave_asistente": ["jarvis", "hey jarvis"],
+  "nombre_asistente": "Jarvis",
+  "idioma": "es-ES",
+  "email": {
+    "usuario": "TU_EMAIL@gmail.com",
+    "app_password": "TU_APP_PASSWORD",
+    "imap_host": "imap.gmail.com",
+    "intervalo_minutos": 60
+  },
+  "musica": {
+    "canciones": {
+      "black in black": "Back In Black AC/DC",
+      "back in black": "Back In Black AC/DC"
+    }
+  },
+  "rutina": {
+    "lunes": [
+      { "hora": "04:00", "tarea": "Despertarse y estirarse" },
+      { "hora": "07:00", "tarea": "Ir al colegio" }
+    ],
+    "martes": [
+      { "hora": "04:00", "tarea": "Despertarse y estirarse" },
+      { "hora": "07:00", "tarea": "Ir al colegio" }
+    ],
+    "miercoles": [
+      { "hora": "04:00", "tarea": "Despertarse y estirarse" },
+      { "hora": "07:00", "tarea": "Ir al colegio" }
+    ],
+    "jueves": [
+      { "hora": "04:00", "tarea": "Despertarse y estirarse" },
+      { "hora": "07:00", "tarea": "Ir al colegio" }
+    ],
+    "viernes": [
+      { "hora": "04:00", "tarea": "Despertarse y estirarse" },
+      { "hora": "07:00", "tarea": "Ir al colegio" }
+    ],
+    "sabado": [],
+    "domingo": []
+  }
+}
