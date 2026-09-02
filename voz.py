@@ -1,4 +1,5 @@
 import sys
+import platform
 import threading
 from speech_recognition import UnknownValueError, RequestError
 
@@ -16,15 +17,25 @@ except Exception as e:
 
 def _crear_engine():
     try:
-        engine = pyttsx3.init()
+        if platform.system() == "Windows":
+            engine = pyttsx3.init(driverName="sapi5")
+        else:
+            engine = pyttsx3.init()
+
         voces = engine.getProperty("voices")
         for v in voces:
             if "spanish" in v.id.lower() or "es_" in v.id.lower() or "es-" in v.id.lower():
                 engine.setProperty("voice", v.id)
                 break
+
+        rapidez = engine.getProperty("rate")
+        engine.setProperty("rate", max(rapidez - 20, 100))
         return engine
     except Exception as e:
         print(f"No se pudo inicializar el motor de voz: {e}", flush=True)
+        print("  Sugerencias: ", flush=True)
+        print("  - En Windows: pip install pyttsx3 pypiwin32", flush=True)
+        print("  - Verifica que tus altavoces y motor TTS estén activos", flush=True)
         return None
 
 

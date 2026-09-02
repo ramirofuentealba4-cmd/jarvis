@@ -1,7 +1,9 @@
 import json
 import os
 import threading
+import time
 import webbrowser
+from datetime import datetime
 import speech_recognition as sr
 
 import correo
@@ -29,13 +31,39 @@ Comandos disponibles:
 
 
 def cargar_config():
+    if not os.path.exists(RUTA_CONFIG):
+        print("=" * 50, flush=True)
+        print("Error: no se encontró config.json", flush=True)
+        print("Para crearlo, ejecuta:", flush=True)
+        print("  cp config.ejemplo.json config.json", flush=True)
+        print("  y completa tus datos (Gmail, API key, nombre, rutina).", flush=True)
+        print("=" * 50, flush=True)
+        return None
     with open(RUTA_CONFIG, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
+def saludo_por_hora():
+    hora = datetime.now().hour
+    if 5 <= hora < 12:
+        return "Buenos días"
+    elif 12 <= hora < 20:
+        return "Buenas tardes"
+    else:
+        return "Buenas noches"
+
+
 def generar_saludo(config):
-    plantilla = config.get("saludo", "Hola {usuario}, soy {asistente}. ¿En qué te ayudo?")
-    return plantilla.replace("{usuario}", config.get("nombre_usuario", "")).replace("{asistente}", config["nombre_asistente"])
+    saludo_hora = saludo_por_hora()
+    plantilla = config.get("saludo", "=== {saludo_hora} señor {usuario}, ¿en qué trabajamos hoy?")
+    return (plantilla
+            .replace("{saludo_hora}", saludo_hora)
+            .replace("{usuario}", config.get("nombre_usuario", ""))
+            .replace("{asistente}", config["nombre_asistente"]))
+
+
+def respuesta_jarvis(config):
+    return config.get("respuesta_jarvis", "Hola soy Jarvis, ¿cómo te ayudo?")
 
 
 def procesar(comando, config):
@@ -65,7 +93,7 @@ def procesar(comando, config):
                 lista = " ".join(f"a las {t['hora']}, {t['tarea']}." for t in tareas)
                 hablar(f"Hoy tienes: {lista}")
             else:
-                hablar("Hoy no tienes tareas programadas.")
+                hablar(config.get("sin_tareas", "Hoy no quedan más tareas programadas."))
             return True
 
         if "próxima" in comando or "proxima" in comando:
@@ -83,11 +111,6 @@ def procesar(comando, config):
             if not cancion:
                 cancion = "back in black ac dc"
             hablar(musica.reproducir(config, cancion))
-            return True
-
-        if comando.startswith(tuple(config["clave_asistente"])):
-            print("Comando: saludo por nombre", flush=True)
-            hablar("Dime, ¿qué necesitas?")
             return True
 
         for prefijo in ("pregúntale a jarvis ", "pregunta a jarvis ", "pregúntale a jarvis", "pregunta a jarvis"):
@@ -112,9 +135,32 @@ def procesar(comando, config):
         return True
 
 
+def contiene_clave(comando, config):
+    return comando.startswith(tuple(config["clave_asistente"]))
+
+
+def iniciar_sesion_activa(config, recognizer, mic, timeout_escucha, duracion_frase, inactividad_seg):
+    hablar(respuesta_jarvis(config))
+    ultima_actividad = time.time()
+    while True:
+        if time.time() - ultima_actividad > inactividad_seg:
+            hablar(config.get("saludo_inactividad", "Dime jarvis si me necesitas."))
+            return True
+
+        comando = escuchar(recognizer, mic, config["idioma"], timeout_escucha, duracion_frase)
+        if not comando:
+            continue
+        ultima_actividad = time.time()
+        activo = procesar(comando, config)
+        if not activo:
+            return False
+
+
 def main():
     print(BANNER, flush=True)
     config = cargar_config()
+    if config is None:
+        return
 
     recognizer = sr.Recognizer()
     indice = config.get("microfono_indice")
@@ -130,18 +176,21 @@ def main():
 
     rutina.iniciar(config, hablar)
     correo.iniciar_avisos(config, hablar)
-    tareas = rutina.tareas_hoy(config)
-    if tareas:
-        hablar(rutina.proximo_aviso_texto(config))
 
     timeout_escucha = config.get("timeout_escucha", 7)
     duracion_frase = config.get("duracion_frase", 8)
+    inactividad_seg = config.get("tiempo_inactividad_seg", 60)
 
-    activo = True
-    while activo:
-        comando = escuchar(recognizer, mic, config["idioma"], timeout_escucha, duracion_frase)
-        if comando:
-            activo = procesar(comando, config)
+    print("Modo dormido: di 'jarvis' para despertarme.", flush=True)
+    while True:
+        comando = escuchar(recognizer, mic, config["idioma"], timeout_escucha, 4)
+        if not comando:
+            continue
+        if contiene_clave(comando, config):
+            seguir = iniciar_sesion_activa(config, recognizer, mic, timeout_escucha, duracion_frase, inactividad_seg)
+            if seguir is False:
+                break
+            print("Volviendo a modo dormido: di 'jarvis' para despertarme.", flush=True)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,10 @@ pip install -r requirements.txt
    | `email.app_password` | App Password de Gmail (ajustes → verificación en 2 pasos → contraseñas de aplicaciones) |
    | `gemini.api_key` | Tu API key de Google Gemini (https://aistudio.google.com) |
    | `nombre_usuario` | Tu nombre (ej. "Ramiro") |
-   | `saludo` | Personaliza el saludo de voz. Usa `{usuario}` y `{asistente}` |
+   | `saludo` | Personaliza el saludo. Usa `{saludo_hora}`, `{usuario}` y `{asistente}`. |
+   | `respuesta_jarvis` | Qué dice Jarvis al oír la palabra "jarvis" |
+   | `sin_tareas` | Mensaje cuando no hay tareas programadas |
+   | `tiempo_inactividad_seg` | Segundos de inactividad antes de volver a dormir |
    | `rutina` | Horarios de cada día (`"hora": "HH:MM"`, `"tarea": "..."`) |
    | `musica.canciones` | Abreviaciones de voz → URL o búsqueda de YouTube |
 
@@ -53,3 +56,17 @@ python jarvis.py
 ### Avisos automáticos
 
 El asistente corre en segundo plano un hilo que anuncia por voz cada tarea de la rutina un minuto antes de su hora, y consulta correos en segundo plano según `intervalo_minutos`.
+
+### Modo dormido / despierto
+
+El asistente arranca en **modo dormido**: escucha el micrófono en silencio e ignora todo salvo la palabra **"jarvis"**. Al escucharla se despierta, saluda y queda atento a tus órdenes. Tras `tiempo_inactividad_seg` (60 s por defecto) sin comandos, vuelve a dormirse.
+
+### Saludo según la hora
+
+Al despertar, Jarvis saluda dependiendo de la hora actual:
+
+| Hora | Saludo |
+|---|---|
+| 5:00 – 11:59 | Buenos días señor {nombre}, ¿en qué trabajamos hoy? |
+| 12:00 – 19:59 | Buenas tardes señor {nombre}, ¿en qué trabajamos hoy? |
+| 20:00 – 4:59 | Buenas noches señor {nombre}, ¿en qué trabajamos hoy? |
