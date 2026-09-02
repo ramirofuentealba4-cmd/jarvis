@@ -34,57 +34,63 @@ def cargar_config():
 def procesar(comando, config):
     print(f"\nProcesando comando: '{comando}'", flush=True)
 
-    if "salir" in comando or "detente" in comando or "apágate" in comando:
-        print("Comando: salir", flush=True)
-        hablar("Hasta luego.")
-        return False
+    try:
+        if "salir" in comando or "detente" in comando or "apágate" in comando:
+            print("Comando: salir", flush=True)
+            hablar("Hasta luego.")
+            return False
 
-    if "abre el navegador" in comando or ("abre" in comando and "navegador" in comando):
-        print("Comando: abrir navegador", flush=True)
-        webbrowser.open("https://www.google.com")
-        hablar("Abriendo el navegador.")
+        if "abre el navegador" in comando or ("abre" in comando and "navegador" in comando):
+            print("Comando: abrir navegador", flush=True)
+            webbrowser.open("https://www.google.com")
+            hablar("Abriendo el navegador.")
+            return True
+
+        if "correo" in comando:
+            print("Comando: revisar correos", flush=True)
+            hablar(correo.texto_no_leidos(config))
+            return True
+
+        if "hacer hoy" in comando or "tareas de hoy" in comando:
+            print("Comando: tareas de hoy", flush=True)
+            tareas = rutina.tareas_hoy(config)
+            if tareas:
+                lista = " ".join(f"a las {t['hora']}, {t['tarea']}." for t in tareas)
+                hablar(f"Hoy tienes: {lista}")
+            else:
+                hablar("Hoy no tienes tareas programadas.")
+            return True
+
+        if "próxima" in comando or "proxima" in comando:
+            print("Comando: próxima tarea", flush=True)
+            hablar(rutina.proximo_aviso_texto(config))
+            return True
+
+        if musica.es_cancion(config, comando):
+            print("Comando: reproducir música", flush=True)
+            cancion = ""
+            for prefijo in ("reproduce ", "ponme la canción ", "ponme la cancion ", "pon ", "toca "):
+                if prefijo in comando:
+                    cancion = comando.split(prefijo, 1)[1].strip()
+                    break
+            if not cancion:
+                cancion = "back in black ac dc"
+            hablar(musica.reproducir(config, cancion))
+            return True
+
+        if comando.startswith(tuple(config["clave_asistente"])):
+            print("Comando: saludo por nombre", flush=True)
+            hablar("Dime, ¿qué necesitas?")
+            return True
+
+        print("Comando no reconocido.", flush=True)
+        hablar("No entendí eso. Puedes decir: correo, navegador, tareas, o reproduce música.")
         return True
 
-    if "correo" in comando or "correo" in comando:
-        print("Comando: revisar correos", flush=True)
-        hablar(correo.texto_no_leidos(config))
+    except Exception as e:
+        print(f"Error al ejecutar comando: {type(e).__name__}: {e}", flush=True)
+        hablar(f"Hubo un error: {e}")
         return True
-
-    if "hacer hoy" in comando or "tareas de hoy" in comando:
-        print("Comando: tareas de hoy", flush=True)
-        tareas = rutina.tareas_hoy(config)
-        if tareas:
-            lista = " ".join(f"a las {t['hora']}, {t['tarea']}." for t in tareas)
-            hablar(f"Hoy tienes: {lista}")
-        else:
-            hablar("Hoy no tienes tareas programadas.")
-        return True
-
-    if "próxima" in comando or "proxima" in comando:
-        print("Comando: próxima tarea", flush=True)
-        hablar(rutina.proximo_aviso_texto(config))
-        return True
-
-    if musica.es_cancion(config, comando):
-        print("Comando: reproducir música", flush=True)
-        cancion = ""
-        for prefijo in ("reproduce ", "ponme la canción ", "ponme la cancion ", "pon ", "toca "):
-            if prefijo in comando:
-                cancion = comando.split(prefijo, 1)[1].strip()
-                break
-        if not cancion:
-            cancion = "back in black ac dc"
-        hablar(musica.reproducir(config, cancion))
-        return True
-
-    if comando.startswith(tuple(config["clave_asistente"])):
-        print("Comando: saludo por nombre", flush=True)
-        hablar("Dime, ¿qué necesitas?")
-        return True
-
-    print("Comando no reconocido.", flush=True)
-    hablar("No entendí eso. Puedes decir: correo, navegador, tareas, o reproduce música.")
-    return True
 
 
 def main():

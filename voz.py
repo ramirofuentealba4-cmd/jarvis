@@ -1,5 +1,6 @@
 import threading
 import pyttsx3
+from speech_recognition import UnknownValueError, RequestError
 
 _engine = None
 _engine_lock = threading.Lock()
@@ -28,6 +29,12 @@ def escuchar(recognizer, fuente, idioma="es-ES", timeout_escucha=7, duracion_fra
         texto = recognizer.recognize_google(audio, language=idioma)
         print(f"Reconocido: {texto}", flush=True)
         return texto.lower()
+    except UnknownValueError:
+        print("Error de reconocimiento: no pude entender lo que dijiste.", flush=True)
+        return ""
+    except RequestError as e:
+        print(f"Error de reconocimiento: no hay conexión con el servicio de voz. ({e})", flush=True)
+        return ""
     except Exception as e:
-        print(f"Error de reconocimiento: {type(e).__name__}: {e}", flush=True)
+        print(f"Error de reconocimiento: {e}", flush=True)
         return ""
