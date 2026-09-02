@@ -17,6 +17,11 @@
       "back in black": "Back In Black AC/DC"
     }
   },
+  "gemini": {
+    "api_key": "TU_API_KEY_DE_GEMINI",
+    "modelo": "gemini-2.0-flash",
+    "system_prompt": "Eres Jarvis, un asistente de voz amigable. Responde en español, de forma breve y natural (máximo 2 oraciones). Sé útil pero conciso."
+  },
   "rutina": {
     "lunes": [
       { "hora": "04:00", "tarea": "Despertarse y estirarse" },

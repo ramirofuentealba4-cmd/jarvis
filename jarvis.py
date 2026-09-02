@@ -5,6 +5,7 @@ import webbrowser
 import speech_recognition as sr
 
 import correo
+import gemini
 import musica
 import rutina
 from voz import hablar, escuchar, calibrar
@@ -16,12 +17,13 @@ BANNER = """
   JARVIS - Asistente de Voz
 =====================================
 Comandos disponibles:
-  "revisa el correo"        -> Cuenta correos nuevos
-  "abre el navegador"       -> Abre el navegador
-  "qué tengo que hacer hoy" -> Lista la rutina
-  "cuál es la próxima"      -> Próxima tarea
-  "reproduce [cancion]"     -> Abre en YouTube
-  "salir" / "detente"       -> Cierra Jarvis
+  "revisa el correo"             -> Cuenta correos nuevos
+  "abre el navegador"            -> Abre el navegador
+  "qué tengo que hacer hoy"      -> Lista la rutina
+  "cuál es la próxima"           -> Próxima tarea
+  "reproduce [cancion]"          -> Abre en YouTube
+  "pregúntale a jarvis [algo]"   -> Pregunta a Gemini AI
+  "salir" / "detente"            -> Cierra Jarvis
 =====================================
 """
 
@@ -83,8 +85,19 @@ def procesar(comando, config):
             hablar("Dime, ¿qué necesitas?")
             return True
 
-        print("Comando no reconocido.", flush=True)
-        hablar("No entendí eso. Puedes decir: correo, navegador, tareas, o reproduce música.")
+        for prefijo in ("pregúntale a jarvis ", "pregunta a jarvis ", "pregúntale a jarvis", "pregunta a jarvis"):
+            if prefijo in comando:
+                pregunta = comando.split(prefijo, 1)[1].strip() if prefijo in comando else ""
+                if pregunta:
+                    print(f"Gemini: '{pregunta}'", flush=True)
+                    hablar(gemini.preguntar_gemini(config, pregunta))
+                else:
+                    hablar("¿Qué quieres preguntarle a Jarvis?")
+                return True
+
+        print("No reconocido, consultando a Gemini...", flush=True)
+        respuesta = gemini.preguntar_gemini(config, comando)
+        hablar(respuesta)
         return True
 
     except Exception as e:
