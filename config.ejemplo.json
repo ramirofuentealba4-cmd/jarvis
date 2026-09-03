@@ -1,5 +1,5 @@
 {
-  "clave_asistente": ["jarvis", "hey jarvis"],
+  "clave_asistente": ["oye jarvis", "jarvis", "hey jarvis"],
   "nombre_asistente": "Jarvis",
   "nombre_usuario": "TU_NOMBRE",
   "saludo": "=== {saludo_hora} señor {usuario}, ¿en qué trabajamos hoy?",

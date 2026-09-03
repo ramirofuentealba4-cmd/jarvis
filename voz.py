@@ -1,93 +1,69 @@
+import asyncio
+import os
 import platform
+import tempfile
 import threading
+
+import edge_tts
 import speech_recognition as sr
 from speech_recognition import UnknownValueError, RequestError
 
-_engine = None
-_engine_lock = threading.Lock()
+VOZ_POR_DEFECTO = "es-CL-LorenzoNeural"
+_audio_lock = threading.Lock()
 
 
-def _crear_engine():
-    global _engine
+def _reproducir_mp3(ruta):
     try:
-        if _engine is not None:
-            try:
-                _engine.stop()
-            except Exception:
-                pass
-            _engine = None
-
-        if platform.system() == "Windows":
-            engine = pyttsx3.init(driverName="sapi5")
-        else:
-            engine = pyttsx3.init()
-
-        voces = engine.getProperty("voices")
-        for v in voces:
-            if "spanish" in v.id.lower() or "es_" in v.id.lower() or "es-" in v.id.lower():
-                engine.setProperty("voice", v.id)
-                break
-
-        rate = engine.getProperty("rate")
-        engine.setProperty("rate", max(rate - 20, 100))
-        _engine = engine
-        return engine
-    except Exception as e:
-        print(f"No se pudo inicializar el motor de voz: {e}", flush=True)
-        print("  Instala pyttsx3 con soporte TTS:", flush=True)
-        print("  pip install pyttsx3 pypiwin32", flush=True)
-        _engine = None
-        return None
-
-
-def _decir(texto):
-    global _engine
-    with _engine_lock:
-        try:
-            if _engine is None:
-                _crear_engine()
-            if _engine is None:
-                return False
-
-            _engine.say(texto)
-            _engine.runAndWait()
-            return True
-        except Exception as e:
-            print(f"Error al hablar: {e}", flush=True)
-            try:
-                _crear_engine()
-                if _engine is not None:
-                    _engine.say(texto)
-                    _engine.runAndWait()
-                    return True
-            except Exception:
-                pass
-            return False
-
-
-def hablar(texto):
-    print(f"JARVIS: {texto}", flush=True)
-    try:
-        import pyttsx3
-    except ImportError:
-        print("pyttsx3 no instalado. Instala con: pip install pyttsx3", flush=True)
+        import pygame
+        pygame.mixer.init()
+        pygame.mixer.music.load(ruta)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pygame.time.wait(50)
+        pygame.mixer.quit()
         return
+    except ImportError:
+        pass
+    except Exception as e:
+        print(f"Error pygame: {e}", flush=True)
+
+    if platform.system() == "Windows":
+        os.system(f'start /wait "" "{ruta}"')
+    elif platform.system() == "Darwin":
+        os.system(f'afplay "{ruta}"')
+    else:
+        os.system(f'mpv --no-video "{ruta}" 2>/dev/null || ffplay -nodisp -autoexit "{ruta}" 2>/dev/null')
+
+
+async def _generar_audio(texto, ruta, voz):
+    communicate = edge_tts.Communicate(texto, voz)
+    await communicate.save(ruta)
+
+
+def hablar(texto, voz=None):
+    print(f"JARVIS: {texto}", flush=True)
 
     if not texto or not texto.strip():
         return
 
-    if len(texto) > 300:
-        partes = []
-        for oracion in texto.replace("\n", " ").split(". "):
-            oracion = oracion.strip()
-            if oracion:
-                partes.append(oracion)
-        for parte in partes:
-            if not parte.endswith((".", "!", "?")):
-                parte += "."
-            _decir(parte)
-    else:
-        _decir(texto)
+    voz = voz or VOZ_POR_DEFECTO
+
+    with _audio_lock:
+        tmp = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
+                tmp = f.name
+
+            asyncio.run(_generar_audio(texto, tmp, voz))
+            _reproducir_mp3(tmp)
+        except Exception as e:
+            print(f"Error al hablar: {e}", flush=True)
+        finally:
+            if tmp and os.path.exists(tmp):
+                try:
+                    os.unlink(tmp)
+                except Exception:
+                    pass
 
 
 def calibrar(recognizer, fuente):
