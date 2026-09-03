@@ -6,8 +6,7 @@ import webbrowser
 from datetime import datetime
 import speech_recognition as sr
 
-import correo
-import gemini
+import ia
 import musica
 import rutina
 from voz import hablar, escuchar, calibrar
@@ -24,7 +23,7 @@ Comandos disponibles:
   "qué tengo que hacer hoy"      -> Lista la rutina
   "cuál es la próxima"           -> Próxima tarea
   "reproduce [cancion]"          -> Abre en YouTube
-  "pregúntale a jarvis [algo]"   -> Pregunta a Gemini AI
+  "pregúntale a jarvis [algo]"   -> Pregunta a la IA (Gemini/Groq/Cerebras)
   "salir" / "detente"            -> Cierra Jarvis
 =====================================
 """
@@ -118,15 +117,15 @@ def procesar(comando, config):
             if prefijo in comando:
                 pregunta = comando.split(prefijo, 1)[1].strip() if prefijo in comando else ""
                 if pregunta:
-                    print(f"Gemini: '{pregunta}'", flush=True)
-                    hablar(gemini.preguntar_gemini(config, pregunta))
+                    print(f"IA: '{pregunta}'", flush=True)
+                    hablar(ia.preguntar_ia(config, pregunta))
                 else:
                     hablar("¿Qué quieres preguntarle a Jarvis?")
                 return True
 
-        print("No reconocido, consultando a Gemini...", flush=True)
-        hablar("Un momento, estoy consultando con Gemini.")
-        respuesta = gemini.preguntar_gemini(config, comando)
+        print("No reconocido, consultando a la IA...", flush=True)
+        hablar("Un momento, estoy consultando con la IA.")
+        respuesta = ia.preguntar_ia(config, comando)
         hablar(respuesta)
         return True
 
@@ -136,17 +135,13 @@ def procesar(comando, config):
         return True
 
 
-def contiene_clave(comando, config):
-    return comando.startswith(tuple(config["clave_asistente"]))
-
-
 def iniciar_sesion_activa(config, recognizer, mic, timeout_escucha, duracion_frase, inactividad_seg):
     hablar(respuesta_jarvis(config))
     ultima_actividad = time.time()
     while True:
         if time.time() - ultima_actividad > inactividad_seg:
-            hablar(config.get("saludo_inactividad", "Dime jarvis si me necesitas."))
-            return True
+            hablar(config.get("saludo_inactividad", "Estoy aquí, dime qué necesitas."))
+            ultima_actividad = time.time()
 
         comando = escuchar(recognizer, mic, config["idioma"], timeout_escucha, duracion_frase)
         if not comando:
@@ -155,6 +150,13 @@ def iniciar_sesion_activa(config, recognizer, mic, timeout_escucha, duracion_fra
         activo = procesar(comando, config)
         if not activo:
             return False
+
+
+def auto_musica(config):
+    url = config.get("auto_musica_url")
+    if url and url.strip().lower() != "none" and "youtube.com" in url:
+        webbrowser.open(url)
+        print(f"Abriendo música automática: {url}", flush=True)
 
 
 def main():
@@ -177,21 +179,13 @@ def main():
 
     rutina.iniciar(config, hablar)
     correo.iniciar_avisos(config, hablar)
+    auto_musica(config)
 
     timeout_escucha = config.get("timeout_escucha", 7)
     duracion_frase = config.get("duracion_frase", 8)
     inactividad_seg = config.get("tiempo_inactividad_seg", 60)
 
-    hablar("Estoy en modo dormido. Di jarvis para despertarme.")
-    while True:
-        comando = escuchar(recognizer, mic, config["idioma"], timeout_escucha, 4)
-        if not comando:
-            continue
-        if contiene_clave(comando, config):
-            seguir = iniciar_sesion_activa(config, recognizer, mic, timeout_escucha, duracion_frase, inactividad_seg)
-            if seguir is False:
-                break
-            hablar("Vuelvo a dormir. Di jarvis si me necesitas.")
+    iniciar_sesion_activa(config, recognizer, mic, timeout_escucha, duracion_frase, inactividad_seg)
 
 
 if __name__ == "__main__":

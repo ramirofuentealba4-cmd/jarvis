@@ -11,6 +11,7 @@
   "microfono_indice": null,
   "timeout_escucha": 7,
   "duracion_frase": 8,
+  "auto_musica_url": "https://www.youtube.com/watch?v=pAgnJDJN4VA&list=PLpZaq7kciiNIscD5bMLUIyesR_EHTSvxu&index=1",
   "email": {
     "usuario": "TU_EMAIL@gmail.com",
     "app_password": "TU_APP_PASSWORD",
@@ -26,6 +27,18 @@
   "gemini": {
     "api_key": "TU_API_KEY_DE_GEMINI",
     "modelo": "gemini-3.8-flash",
+    "system_prompt": "Eres Jarvis, un asistente de voz amigable. Responde en español, de forma breve y natural (máximo 2 oraciones). Sé útil pero conciso."
+  },
+  "groq": {
+    "api_key": "TU_API_KEY_GROQ",
+    "modelo": "llama-3.3-70b-versatile",
+    "base_url": "https://api.groq.com/openai/v1",
+    "system_prompt": "Eres Jarvis, un asistente de voz amigable. Responde en español, de forma breve y natural (máximo 2 oraciones). Sé útil pero conciso."
+  },
+  "cerebras": {
+    "api_key": "TU_API_KEY_CEREBRAS",
+    "modelo": "gpt-oss-120b",
+    "base_url": "https://api.cerebras.ai/v1",
     "system_prompt": "Eres Jarvis, un asistente de voz amigable. Responde en español, de forma breve y natural (máximo 2 oraciones). Sé útil pero conciso."
   },
   "rutina": {

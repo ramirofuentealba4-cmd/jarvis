@@ -5,7 +5,7 @@ import os
 from mcp.server.mcpserver import MCPServer
 
 import correo
-import gemini
+import ia
 import musica
 import rutina
 from voz import hablar
@@ -37,10 +37,10 @@ def hablar_jarvis(texto: str) -> str:
 
 
 @mcp.tool()
-def preguntar_gemini(pregunta: str) -> str:
-    """Hace una pregunta a Gemini AI y devuelve la respuesta en texto."""
+def preguntar_ia(pregunta: str) -> str:
+    """Hace una pregunta a la IA (Gemini, Groq o Cerebras con fallback automático) y devuelve la respuesta en texto."""
     config = _cargar_config()
-    return gemini.preguntar_gemini(config, pregunta)
+    return ia.preguntar_ia(config, pregunta)
 
 
 @mcp.tool()
