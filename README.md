@@ -44,7 +44,7 @@ python jarvis.py
 
 | Comando                                   | Acción                              |
 |-------------------------------------------|-------------------------------------|
-| "jarvis"                                  | Preparar asistente                  |
+| "oye jarvis" / "jarvis"                   | Preparar asistente                  |
 | "abre el navegador"                       | Abre el navegador                   |
 | "¿qué tengo que hacer hoy?"               | Lista la rutina del día             |
 | "¿cuál es la próxima tarea?"              | Dice la próxima tarea               |
@@ -70,3 +70,65 @@ Al despertar, Jarvis saluda dependiendo de la hora actual:
 | 5:00 – 11:59 | Buenos días señor {nombre}, ¿en qué trabajamos hoy? |
 | 12:00 – 19:59 | Buenas tardes señor {nombre}, ¿en qué trabajamos hoy? |
 | 20:00 – 4:59 | Buenas noches señor {nombre}, ¿en qué trabajamos hoy? |
+
+## Servidor MCP (Model Context Protocol)
+
+Jarvis también puede exponerse como **servidor MCP**, lo que permite que cualquier IA compatible (Claude Desktop, ChatGPT, VS Code, opencode, etc., incluidas las gratuitas) use las capacidades de Jarvis como herramientas.
+
+### Herramientas expuestas
+
+| Herramienta | Descripción |
+|---|---|
+| `hablar_jarvis(texto)` | Jarvis dice el texto en voz alta (voz chilena `es-CL-LorenzoNeural`) |
+| `preguntar_gemini(pregunta)` | Consulta a Gemini AI |
+| `leer_correos()` | Cuenta correos no leídos de Gmail |
+| `tareas_hoy()` | Lista las tareas de la rutina de hoy |
+| `proxima_tarea()` | Siguiente tarea programada |
+| `reproducir_musica(cancion)` | Reproduce una canción en YouTube |
+
+### Requisitos
+
+```bash
+pip install "mcp[cli]"
+```
+
+El servidor lee `config.json`, así que asegúrate de tenerlo configurado (ver sección **Configuración**).
+
+### Probar localmente
+
+```bash
+python mcp_server.py
+```
+
+### Conectar desde Claude Desktop
+
+Edita tu `claude_desktop_config.json` y añade:
+
+```json
+{
+  "mcpServers": {
+    "jarvis": {
+      "command": "python",
+      "args": ["C:\\ruta\\completa\\a\\jarvis\\mcp_server.py"]
+    }
+  }
+}
+```
+
+### Conectar desde opencode
+
+En tu `opencode.json`:
+
+```json
+{
+  "mcp": {
+    "jarvis": {
+      "type": "local",
+      "command": ["python", "mcp_server.py"],
+      "enabled": true
+    }
+  }
+}
+```
+
+(ajusta `command` con la ruta completa de `mcp_server.py` si es necesario)
