@@ -8,12 +8,12 @@ MARKER_API_KEY = "TU_API_KEY_DE_GEMINI"
 def _inicializar(config):
     global _cliente
     if _cliente is None:
-        api_key = config["gemini"]["api_key"]
+        api_key = config.get("gemini", {}).get("api_key", "")
         _cliente = genai.Client(api_key=api_key)
 
 
 def _api_key_valida(config):
-    key = config["gemini"].get("api_key", "")
+    key = config.get("gemini", {}).get("api_key", "")
     return bool(key) and key != MARKER_API_KEY and not key.startswith("TU_")
 
 
@@ -38,8 +38,9 @@ def preguntar_gemini(config, texto):
 
     try:
         _inicializar(config)
-        modelo = config["gemini"].get("modelo", "gemini-3.8-flash")
-        system = config["gemini"].get("system_prompt", "Eres Jarvis, un asistente de voz. Responde en español, breve y natural.")
+        gem = config.get("gemini", {})
+        modelo = gem.get("modelo", "gemini-3.8-flash")
+        system = gem.get("system_prompt", "Eres Jarvis, un asistente de voz. Responde en español, breve y natural.")
         respuesta = _cliente.models.generate_content(
             model=modelo,
             contents=texto,
