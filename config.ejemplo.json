@@ -25,7 +25,7 @@
   },
   "gemini": {
     "api_key": "TU_API_KEY_DE_GEMINI",
-    "modelo": "gemini-3.6-flash",
+    "modelo": "gemini-3.8-flash",
     "system_prompt": "Eres Jarvis, un asistente de voz amigable. Responde en español, de forma breve y natural (máximo 2 oraciones). Sé útil pero conciso."
   },
   "rutina": {

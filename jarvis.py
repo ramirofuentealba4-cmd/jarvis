@@ -38,6 +38,7 @@ def cargar_config():
         print("  cp config.ejemplo.json config.json", flush=True)
         print("  y completa tus datos (Gmail, API key, nombre, rutina).", flush=True)
         print("=" * 50, flush=True)
+        hablar("No encontré config.json. Crea tu archivo de configuración con cp config.ejemplo.json config.json")
         return None
     with open(RUTA_CONFIG, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -181,7 +182,7 @@ def main():
     duracion_frase = config.get("duracion_frase", 8)
     inactividad_seg = config.get("tiempo_inactividad_seg", 60)
 
-    print("Modo dormido: di 'jarvis' para despertarme.", flush=True)
+    hablar("Estoy en modo dormido. Di jarvis para despertarme.")
     while True:
         comando = escuchar(recognizer, mic, config["idioma"], timeout_escucha, 4)
         if not comando:
@@ -190,7 +191,7 @@ def main():
             seguir = iniciar_sesion_activa(config, recognizer, mic, timeout_escucha, duracion_frase, inactividad_seg)
             if seguir is False:
                 break
-            print("Volviendo a modo dormido: di 'jarvis' para despertarme.", flush=True)
+            hablar("Vuelvo a dormir. Di jarvis si me necesitas.")
 
 
 if __name__ == "__main__":

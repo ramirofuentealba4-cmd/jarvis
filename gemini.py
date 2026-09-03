@@ -38,7 +38,7 @@ def preguntar_gemini(config, texto):
 
     try:
         _inicializar(config)
-        modelo = config["gemini"].get("modelo", "gemini-2.0-flash")
+        modelo = config["gemini"].get("modelo", "gemini-3.8-flash")
         system = config["gemini"].get("system_prompt", "Eres Jarvis, un asistente de voz. Responde en español, breve y natural.")
         respuesta = _cliente.models.generate_content(
             model=modelo,
